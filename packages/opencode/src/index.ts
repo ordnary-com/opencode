@@ -2,7 +2,7 @@ import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 import { RunCommand } from "./cli/cmd/run"
 import { GenerateCommand } from "./cli/cmd/generate"
-import { ConsoleCommand } from "./cli/cmd/account"
+import { ConsoleCommand, LoginCommand } from "./cli/cmd/account"
 import { ProvidersCommand } from "./cli/cmd/providers"
 import { AgentCommand } from "./cli/cmd/agent"
 import { UpgradeCommand } from "./cli/cmd/upgrade"
@@ -29,12 +29,16 @@ import { DbCommand } from "./cli/cmd/db"
 import { errorMessage } from "./util/error"
 import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
+import { AskCommand, NolanModelsCommand } from "./cli/cmd/nolan-chat"
+import { ChatCommand } from "./cli/cmd/nolan-repl"
+import { SetupCommand } from "./cli/cmd/nolan-setup"
+import { NolanLogoutCommand } from "./cli/cmd/nolan-logout"
 
 const args = hideBin(process.argv)
 
 function show(out: string) {
   const text = out.trimStart()
-  if (!text.startsWith("opencode ")) {
+  if (!text.startsWith("nolan ")) {
     process.stderr.write(UI.logo() + EOL + EOL)
     process.stderr.write(text + EOL)
     return
@@ -44,7 +48,7 @@ function show(out: string) {
 
 const cli = yargs(args)
   .parserConfiguration({ "populate--": true })
-  .scriptName("opencode")
+  .scriptName("nolan")
   .wrap(100)
   .help("help", "show help")
   .alias("help", "h")
@@ -85,7 +89,11 @@ const cli = yargs(args)
   .command(RunCommand)
   .command(GenerateCommand)
   .command(DebugCommand)
-  .command(ConsoleCommand)
+  // Auth happens inside the TUI now — keep raw commands hidden but functional
+  // so power users / scripts can still invoke them.
+  .command({ ...LoginCommand, describe: false })
+  .command({ ...ConsoleCommand, describe: false })
+  .command(NolanLogoutCommand)
   .command(ProvidersCommand)
   .command(AgentCommand)
   .command(UpgradeCommand)
@@ -101,6 +109,10 @@ const cli = yargs(args)
   .command(SessionCommand)
   .command(PluginCommand)
   .command(DbCommand)
+  .command({ ...AskCommand, describe: false })
+  .command({ ...ChatCommand, describe: false })
+  .command({ ...SetupCommand, describe: false })
+  .command({ ...NolanModelsCommand, command: "nolan-models", describe: false })
   .fail((msg, err) => {
     if (
       msg?.startsWith("Unknown argument") ||

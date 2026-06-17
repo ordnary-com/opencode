@@ -42,6 +42,7 @@ import { DialogMcp } from "./component/dialog-mcp"
 import { DialogStatus } from "./component/dialog-status"
 import { DialogThemeList } from "./component/dialog-theme-list"
 import { DialogHelp } from "./ui/dialog-help"
+import { DialogAccount, DialogBuyCredits, DialogUsage } from "./component/dialog-nolan"
 import { DialogAgent } from "./component/dialog-agent"
 import { DialogSessionList } from "./component/dialog-session-list"
 import { DialogWorkspaceList } from "./component/dialog-workspace-list"
@@ -440,14 +441,14 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
     if (!terminalTitleEnabled() || Flag.OPENCODE_DISABLE_TERMINAL_TITLE) return
 
     if (route.data.type === "home") {
-      renderer.setTerminalTitle("OpenCode")
+      renderer.setTerminalTitle("Nolan Code")
       return
     }
 
     if (route.data.type === "session") {
       const session = sync.session.get(route.data.sessionID)
       if (!session || isDefaultTitle(session.title)) {
-        renderer.setTerminalTitle("OpenCode")
+        renderer.setTerminalTitle("Nolan Code")
         return
       }
 
@@ -793,10 +794,40 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         category: "System",
       },
       {
+        name: "nolan.account",
+        title: "View account",
+        slashName: "account",
+        slashAliases: ["me", "whoami"],
+        run: () => {
+          dialog.replace(() => <DialogAccount />)
+        },
+        category: "Nolan",
+      },
+      {
+        name: "nolan.usage",
+        title: "View usage & credits",
+        slashName: "usage",
+        slashAliases: ["credits", "quota"],
+        run: () => {
+          dialog.replace(() => <DialogUsage />)
+        },
+        category: "Nolan",
+      },
+      {
+        name: "nolan.buy",
+        title: "Buy credits",
+        slashName: "buy",
+        slashAliases: ["topup", "credits-buy"],
+        run: () => {
+          dialog.replace(() => <DialogBuyCredits />)
+        },
+        category: "Nolan",
+      },
+      {
         name: "docs.open",
         title: "Open docs",
         run: () => {
-          open("https://opencode.ai/docs").catch(() => {})
+          open("https://nolan.ordnary.com/docs").catch(() => {})
           dialog.clear()
         },
         category: "System",
@@ -1037,7 +1068,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
     await DialogAlert.show(
       dialog,
       "Update Complete",
-      `Successfully updated to OpenCode v${result.data.version}. Please restart the application.`,
+      `Successfully updated to Nolan Code v${result.data.version}. Please restart the application.`,
     )
 
     void exit()

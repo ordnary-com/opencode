@@ -107,6 +107,13 @@ export const TuiThreadCommand = cmd({
   handler: async (args) => {
     const unguard = win32InstallCtrlCGuard()
     try {
+      const { ensureNolanAuth } = await import("@/cli/nolan-onboarding")
+      const authed = await ensureNolanAuth()
+      if (!authed) {
+        process.exitCode = 0
+        return
+      }
+
       const { TuiConfig } = await import("@/config/tui")
       if (args.fork && !args.continue && !args.session) {
         UI.error("--fork requires --continue or --session")
